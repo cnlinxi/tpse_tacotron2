@@ -1,4 +1,4 @@
-# style-token Tacotron2
+# TPSE Tacotron2
 paper: [Predicting Expressive Speaking Style From Text in End-to-End Speech Synthesis](https://arxiv.org/abs/1808.01410)
 
 reference : [Rayhane-mamah/Tacotron-2](https://github.com/Rayhane-mamah/Tacotron-2)
