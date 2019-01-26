@@ -1,7 +1,7 @@
 # style-token Tacotron2
-paper: [Style Tokens: Unsupervised Style Modeling, Control and Transfer in End-to-End Speech Synthesis](https://arxiv.org/abs/1803.09017)
+paper: [Predicting Expressive Speaking Style From Text in End-to-End Speech Synthesis](https://arxiv.org/abs/1808.01410)
 
-reference : [[Rayhane-mamah](https://github.com/Rayhane-mamah)/**Tacotron-2**]
+reference : [Rayhane-mamah/Tacotron-2](https://github.com/Rayhane-mamah/Tacotron-2)
 
 ****
 
