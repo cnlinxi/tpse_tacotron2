@@ -19,7 +19,7 @@ if train_text_files and AUTO_DETECT_SYMBOLS:
                 line = line.decode('utf-8').strip('\r\n ').split('|')[5]
                 _characters = _characters.union(line)
 else:
-    _characters = 'abcdefghijklmnopqrstuvwxyz12345，。？，！- '
+    _characters = '12345abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ，。？，！#*$% '
 
 _pad = '_'
 _eos = '~'

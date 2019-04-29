@@ -324,16 +324,18 @@ class StyleTokenLayer:
 
 
 class TPSE_FC_Layer:
-    def __init__(self, output_size, scope=None):
+    def __init__(self, output_size, n_layers=1, scope=None):
         self._output_size = output_size
+        self._n_layers = n_layers
         self._scope = 'tpse_fc' if scope is None else scope
 
-    def __call__(self, inputs, n_layers=1):
+    def __call__(self, inputs):
         x = inputs
-        for i in range(n_layers):
-            with tf.variable_scope('{}_{}'.format(self._scope, i)):
-                x = tf.layers.dense(x, units=self._output_size, activation=tf.nn.relu)
-                x = tf.layers.dense(x, units=self._output_size, activation=tf.nn.tanh)
+        with tf.variable_scope('{}'.format(self._scope)):
+            for i in range(self._n_layers):
+                with tf.variable_scope('{}_{}'.format(self._scope, i)):
+                    x = tf.layers.dense(x, units=self._output_size, activation=tf.nn.relu)
+            x = tf.layers.dense(x, units=self._output_size, activation=tf.nn.tanh)
         return x
 
 

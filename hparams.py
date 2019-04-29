@@ -162,8 +162,8 @@ hparams = tf.contrib.training.HParams(
     cbhg_projection_kernel_size=3,  # kernel_size of the CBHG projections
     cbhg_highwaynet_layers=4,  # Number of HighwayNet layers
     cbhg_highway_units=128,  # Number of units used in HighwayNet fully connected layers
-    cbhg_rnn_units=128,
     # Number of GRU units used in bidirectional RNN of CBHG block. CBHG output is 2x rnn_units in shape
+    cbhg_rnn_units=128,
 
     # Loss params
     mask_encoder=True,
@@ -201,7 +201,7 @@ hparams = tf.contrib.training.HParams(
     stacks=2,  # Number of dilated convolution stacks (Default: Simplified Wavenet of Tacotron-2 paper)
     residual_channels=128,  # Number of residual block input/output channels.
     gate_channels=256,  # split in 2 in gated convolutions
-    skip_out_channels=128,  # Number of residual block skip convolution channels.
+    skip_out_channels=128,  # Number of residual blotpck skip convolution channels.
     kernel_size=3,  # The number of inputs to consider in dilated convolutions.
 
     # Upsampling parameters (local conditioning)
@@ -252,17 +252,17 @@ hparams = tf.contrib.training.HParams(
     # % of data to keep as test data, if None, tacotron_test_batches must be not None. (5% is enough to have a good idea about overfit)
     tacotron_test_batches=None,  # number of test batches.
 
-    tacotron_n_style_token=10,
+    # GST
+    tacotron_n_style_token=20,
     tacotron_reference_layer_size=(32, 32, 64, 64, 128, 128),
     tacotron_reference_gru_hidden_size=128,
     tacotron_style_encoder_outputs_size=512,
-    # tacotron_style_alignment=[0.3, 0.8, 0., 0., 0., 0., 0., 0., 0., 0.],  #preferred to use tacotron_style_alignment
-    tacotron_style_reference_audio='reference_audio/lin.wav.npy',
-    tacotron_style_alignment=None,
 
     # TPSE
     tacotron_tpse_gru_hidden_size=128,
     tacotron_fc_output_size=512,  # should be same as tacotron_style_encoder_outputs_size
+
+    style_encoder_dim=16,  # reduction dim of style token for stability, Section 2 in https://arxiv.org/abs/1904.06037
 
     # Learning rate schedule
     tacotron_decay_learning_rate=True,  # boolean, determines if the learning rate will follow an exponential decay

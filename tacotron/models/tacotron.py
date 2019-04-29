@@ -137,13 +137,19 @@ class Tacotron():
 
                     if tp:  # text prediction
                         # TPSE
+                        tp_cbhg = CBHG(hp.cbhg_kernels, hp.cbhg_conv_channels, hp.cbhg_pool_size,
+                                       [hp.cbhg_projection, hp.enc_conv_channels],
+                                       hp.cbhg_projection_kernel_size, hp.cbhg_highwaynet_layers,
+                                       hp.cbhg_highway_units, hp.cbhg_rnn_units, is_training, name='CBHG_TP')
+                        # [batch_size, encoder_steps, cbhg_channels(=cbhg_rnn_units*2)]
+                        tpse_input = tp_cbhg(encoder_outputs, tower_input_lengths[i])
                         tpse_cell = TPSE_GST_Cell(
                             tf.nn.rnn_cell.GRUCell(num_units=hp.tacotron_tpse_gru_hidden_size),
                             TPSE_FC_Layer(output_size=hp.tacotron_fc_output_size),
                             scope='tpse_layer'
                         )
                         # [batch_size,hp.tacotron_fc_output_size]
-                        tpse_style_outputs = tpse_cell(encoder_outputs,
+                        tpse_style_outputs = tpse_cell(tpse_input,
                                                        input_lengths=tower_input_lengths[i])
                         # [batch_size,hp.tacotron_fc_output_size], should be same shape as style_outputs
                         self.tpse_style_outputs = tpse_style_outputs
@@ -177,8 +183,14 @@ class Tacotron():
                             style_encoder_outputs = tf.tile(style_encoder_outputs, multiples=[1, seq_len, 1])
                         else:  # synthesis without style_tokens
                             seq_len = tf.shape(encoder_outputs)[1]
+                            # [batch_size,1,hp.tacotron_fc_output_size]
+                            tpse_style_outputs = tf.expand_dims(tpse_style_outputs, axis=1)
                             style_encoder_outputs = tf.tile(tpse_style_outputs, multiples=[1, seq_len, 1])
 
+                        # dim reduction with linear projection
+                        deep_dense = lambda x, dim: tf.layers.dense(x, dim, activation=None)
+                        # reduce dim for stability
+                        style_encoder_outputs = deep_dense(style_encoder_outputs, dim=hp.style_encoder_dim)
                         encoder_outputs = tf.concat([encoder_outputs, style_encoder_outputs], axis=-1)  # concat
 
                     # Decoder Parts
@@ -447,6 +459,28 @@ class Tacotron():
 
                     regularization = tf.add_n([tf.nn.l2_loss(v) for v in self.all_vars
                                                if 'tpse_layer' in v.name]) * reg_weight
+
+                    # smoth l1 loss: https://blog.csdn.net/u014365862/article/details/79924201
+                    # refer to: https://github.com/hungsing92/test/blob/39fc69346291e6069db63b4c4b1d8dd863771945/net/rpn_loss_op.py
+                    def modified_smooth_l1(box_preds, box_targets, sigma=3.0):
+                        '''
+                            ResultLoss = outside_weights * SmoothL1(inside_weights * (box_pred - box_targets))
+                            SmoothL1(x) = 0.5 * (sigma * x)^2,    if |x| < 1 / sigma^2
+                                          |x| - 0.5 / sigma^2,    otherwise
+                        '''
+                        sigma2 = sigma * sigma
+                        diffs = tf.subtract(box_preds, box_targets)
+                        smooth_l1_signs = tf.cast(tf.less(tf.abs(diffs), 1.0 / sigma2), tf.float32)
+
+                        smooth_l1_option1 = tf.multiply(diffs, diffs) * 0.5 * sigma2
+                        smooth_l1_option2 = tf.abs(diffs) - 0. / sigma2
+                        smooth_l1_add = tf.multiply(smooth_l1_option1, smooth_l1_signs) + tf.multiply(smooth_l1_option2,
+                                                                                                      1 - smooth_l1_signs)
+                        smooth_l1 = smooth_l1_add  # tf.multiply(box_weights, smooth_l1_add)  #
+                        return smooth_l1
+
+                    # rpn_reg_loss  = tf.reduce_mean(tf.reduce_sum(rpn_smooth_l1, axis=1))
+
                     tpse_loss = tf.reduce_mean(tf.abs(self.style_outputs - self.tpse_style_outputs)) + regularization
                     self.tower_tpse_loss.append(tpse_loss)
 
