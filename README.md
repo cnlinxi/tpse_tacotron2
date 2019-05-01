@@ -7,7 +7,9 @@ reference : [Rayhane-mamah/Tacotron-2](https://github.com/Rayhane-mamah/Tacotron
 
 ### Note
 
-- In our server, the default configuration will lead to OOM error...
+- Emotion Speech dataset: [EmoDB](<http://emodb.bilderbar.info/index-1024.html>)
+
+- In our server(GTX V100(16G)), the default configuration will lead to OOM error...
 
   For decrease memory usage, please follow some instructions as followed:
 
@@ -20,16 +22,6 @@ reference : [Rayhane-mamah/Tacotron-2](https://github.com/Rayhane-mamah/Tacotron
 - In hparams.py, set `cleaners` to `basic_cleaners` if you train model in mandarin.
 
 - Multi-GPU version seems to be not accelerated.
-
-### IN TEST
-
-- min training set duration: 100%: 10:/tacotron2; 75%:13:/tacotron2_share75 ;50%: 10:/tacotron2_share50;
-- long sentences(clip_mels_length=False): short: 10:/tacotron2; long: 13:/tacotron_long_sentences
-- min training steps: 10:/tacotron2 and 10:/tacotron2_share50 save every checkpoint files.
-
-### To-Do
-
-*check if not trim_max*: long senteneces
 
 ****
 
